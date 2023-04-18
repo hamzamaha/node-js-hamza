@@ -64,7 +64,7 @@ exports.login= async(req,res)=>{
             userId:user._id,
             name:user.name,
             isAdmin:user.isAdmin
-        },secret,{expiresIn:60})
+        },secret,{expiresIn:"1h"})
 
         return res.status(200).json({
             success:true,

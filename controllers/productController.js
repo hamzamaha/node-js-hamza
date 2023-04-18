@@ -38,7 +38,10 @@ exports.show=async(req, res, next)=>{
 
 
 exports.store=(req,res)=>{
-    let {title,content,price,description,brand,rating,isFeatured,thumbnail,countStock,images,category}=req.body
+    let {title,content,price,description,brand,rating,isFeatured,countStock,category}=req.body
+    const domain=process.env.DOMAIN_NAME
+    const port=process.env.PORT
+    let thumbnail= req.file ? `${domain}:${port}/images/${req.file.filename}` : '';
 
     const myProduct= new Product({
         // title:title,
@@ -70,8 +73,36 @@ exports.store=(req,res)=>{
         })
     })
 
+}
 
+exports.uploadImages= async (req,res)=>{
+    let id= req.params.id
 
+    const domain=process.env.DOMAIN_NAME
+
+    const images =req.files.map(file=>`${domain}/images/${file.filename}`)
+
+    try {
+        
+        const updatedProduct= await Product.findByIdAndUpdate(id,{images:images},{new:true})
+        if (!updatedProduct) {
+            return res.status(404).json({
+                success:false,
+                message:"Product not Found"
+            })
+        }
+
+        res.json({
+            success:true,
+            product:updatedProduct
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            success:false,
+            error
+        })
+    }
 }
 
 

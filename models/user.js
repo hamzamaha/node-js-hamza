@@ -12,6 +12,7 @@ const schemaUser=new Schema({
     },
     password:{
         type:String,
+        min:8,
         required:true
     },
     address:String,
