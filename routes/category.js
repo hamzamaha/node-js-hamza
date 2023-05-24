@@ -5,7 +5,7 @@ const {ValidateCategory} =require("./../middleware/categoryValidation")
 
 
 // Import the functions from UsrControllers
-const {index,show,store,update,patch}= require('../controllers/categoryController')
+const {index,show,store,update,patch,del}= require('../controllers/categoryController')
 
 
 /* GET home page. */
@@ -21,5 +21,7 @@ router.patch('/:id',[ValidateCategory], patch);
 
 // post product
 router.post('/',[ValidateCategory], store);
+
+router.delete('/:id',del);
 
 module.exports = router;

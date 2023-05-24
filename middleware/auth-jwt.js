@@ -10,13 +10,16 @@ const authJwt=()=>{
     })
     .unless({
         path: [
+            // to autorize all routes
+            // {url:/(.*)/} 
+
         {url:/^\/images\/.*/},
-        {url:'/users/login'},
-        {url:'/users/register'},
-        {url:'/products', methods:['POST']},
-        {
-            url:'/products', methods:['GET']
-        }
+        {url:'/api/v1/users/login'},
+        {url:'/api/v1/users/register'},
+        // {url:'/products', methods:['POST']},
+        // {
+        //     url:'/products', methods:['GET']
+        // }
         ]
     })
 }

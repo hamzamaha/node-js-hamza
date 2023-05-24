@@ -112,3 +112,28 @@ exports.update=async(req, res, next)=>{
            }
                 
         }
+
+        exports.del = async (req, res, next) => {
+            let {id} = req.params;
+        
+            if(!mongoose.isValidObjectId(id)){
+              return res.status(400).json({
+                success:false,
+                message:`The category with id = ${id} has been deleted`
+              })
+            }
+            try {
+              const categories = await Category.findByIdAndDelete({'_id':id},req.body);
+              if(!Category){
+                return res.status(404).json({
+                  success: false,
+                  message: `no Category found with id = ${id}`
+                })
+              }
+              res.json({ categories, success:true });
+        
+            } catch(error){
+              res.status(500).json({ success:false })
+            }
+        
+          }        

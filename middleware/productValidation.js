@@ -3,7 +3,7 @@ const Joi = require('joi');
 exports.ValidateProduct = (req,res,next)=>{
     const schema=  Joi.object({
         
-        title: Joi.string().trim().min(5).max(15).required(),
+        title: Joi.string().trim().min(5).max(20).required(),
         description: Joi.string().trim().max(200).required(),
         countStock: Joi.number().default(0),
         isFeatured: Joi.boolean(),

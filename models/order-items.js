@@ -9,6 +9,7 @@ const schemaOrderItem=new Schema({
         type:Number,
         required:true
     },
+    originalPrice:Number
 
 })
 

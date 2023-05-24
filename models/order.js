@@ -14,7 +14,8 @@ const schemaOrder=new Schema({
     },
     status:{
         type:String,
-        enum:['shipped','recived','canceled','pending']
+        enum:['shipped','recived','canceled','pending'],
+        default:'pending'
     },
     total:Number,
     user:{
@@ -23,6 +24,7 @@ const schemaOrder=new Schema({
     },
     orderItems:[{
         type:Schema.Types.ObjectId,ref:'OrderItem',
+        required:true
     }],
     created_at:{
         type:Date,
@@ -32,6 +34,7 @@ const schemaOrder=new Schema({
         type:Date,
         default:Date.now
     },
+    
     
 })
 

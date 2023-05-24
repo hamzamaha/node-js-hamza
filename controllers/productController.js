@@ -1,15 +1,50 @@
 const  mongoose  = require('mongoose')
 const Product =require('./../models/product')
+const fs = require('fs');
+const path = require('path');
 
-exports.index= async(req, res, next)=>{     
-   try {
-    const products =await Product.find().populate('category','-_id label color icon')
-    res.json({ products,success:true })
-   } catch (error) {
-    res.status(500).json({ success:false })
-   }
-        
-}
+const { productPagination } = require("./../middleware/productPagination");
+
+
+exports.paginate = async (req, res, next) => {
+    try {
+      await productPagination(req, res, next);
+      const { products, success } = res;
+      const { currentPage, totalPages, totalItems } = res.pagination;
+      const hasNextPage = currentPage < totalPages;
+      const hasPreviousPage = currentPage > 1;
+      const pagination = {
+        currentPage,
+        totalPages,
+        totalItems
+      };
+      if (hasNextPage) {
+        pagination.nextPage = currentPage + 1;
+      }
+      if (hasPreviousPage) {
+        pagination.previousPage = currentPage - 1;
+      }
+  
+      res.json({
+        products,
+        pagination,
+        success,
+      });
+    } catch (error) {
+      res.status(500).json({ success: false });
+    }
+  };
+  
+  
+
+  exports.index = async (req, res, next) => {
+    try {
+      const products = await Product.find().populate('category','-_id label color icon')
+      res.status(200).json({ products, success: true })
+    } catch (error) {
+      res.status(500).json({ success: false })
+    }
+  }
 
 
 exports.show=async(req, res, next)=>{    
@@ -23,6 +58,7 @@ exports.show=async(req, res, next)=>{
     }
     try {
         const product =await Product.findById(id)
+        // .populate('category')
         if (!product) {
             return res.status(404).json({
                 success:false,
@@ -43,6 +79,7 @@ exports.store=(req,res)=>{
     const port=process.env.PORT
     let thumbnail= req.file ? `${domain}:${port}/images/${req.file.filename}` : '';
 
+
     const myProduct= new Product({
         // title:title,
         // content:content,
@@ -56,7 +93,6 @@ exports.store=(req,res)=>{
         isFeatured,
         thumbnail,
         countStock,
-        images,
         category
         // ...req.body
     })
@@ -67,6 +103,7 @@ exports.store=(req,res)=>{
             success:true
         })
     }).catch((err)=>{
+        
         res.status(500).json({
             error:err,
             success:false
@@ -80,7 +117,7 @@ exports.uploadImages= async (req,res)=>{
 
     const domain=process.env.DOMAIN_NAME
 
-    const images =req.files.map(file=>`${domain}/images/${file.filename}`)
+    const images =req.files.map(file=>`${domain}:${port}/images/${file.filename}`)
 
     try {
         
@@ -143,7 +180,7 @@ exports.update=async(req, res, next)=>{
             })
         }
         try {
-            // this is for patch methode
+            
             const product =await Product.findOneAndUpdate({'_id':id},req.body);
             if (!product) {
                 return res.status(404).json({
@@ -221,3 +258,84 @@ exports.searchBySegment= async (req,res)=>{
        
     }
 }
+
+
+exports.del = async (req, res, next) => {
+    const { id } = req.params;
+
+    if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({
+            success: false,
+            message: `Invalid product ID: ${id}`
+        });
+    }
+
+    try {
+        const product = await Product.findByIdAndDelete(id);
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: `Product with ID ${id} not found.`
+            });
+        }
+
+        // Remove the product image from the images folder
+        const imagePath = path.join(__dirname, '..', 'public', 'images', product.thumbnail);
+        if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+        }
+
+        res.json({
+            success: true,
+            message: `Product with ID ${id} has been deleted.`,
+            product
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            success: false,
+            message: 'Server error while trying to delete product.',
+            error: err.message
+        });
+    }
+};
+
+
+// exports.del = async (req, res, next) => {
+//     const { id } = req.params;
+
+//     if (!mongoose.isValidObjectId(id)) {
+//         return res.status(400).json({
+//             success: false,
+//             message: `Invalid product ID: ${id}`
+//         });
+//     }
+
+//     try {
+//         const product = await Product.findByIdAndDelete(id);
+
+//         if (!product) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: `Product with ID ${id} not found.`
+//             });
+//         }
+
+//         res.json({
+//             success: true,
+//             message: `Product with ID ${id} has been deleted.`,
+//             product
+//         });
+
+//     } catch (err) {
+//         res.status(500).json({
+//             success: false,
+//             message: 'Server error while trying to delete product.',
+//             error: err.message
+//         });
+//     }
+// };
+
+

@@ -22,6 +22,9 @@ const schemaUser=new Schema({
     isAdmin:{
         type:Boolean,
         default:false
+    },
+    order: {
+        type:Schema.Types.ObjectId,ref:'Order',
     }
 })
 
